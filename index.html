@@ -1,17 +1,197 @@
-<!-- index.html -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signature Web App</title>
-  <link rel="stylesheet" href="styles.css">
+    <title>SignEZ</title>
+    <style>
+        body {
+            background-color: #1d78d37d;
+            font-family: Poppins , Nunito;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #canvas {
+            border: 1px solid #000;
+            margin-bottom: 20px;
+            background-color: #fff;
+            max-width: 100%;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            border-radius: 20px;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        #clearBtn {
+            background-color: #b31d1d;
+        }
+
+        #saveBtn {
+            background-color: #4caf50;
+        }
+
+        #colorPicker {
+            margin-bottom: 20px;
+        }
+
+        .interactive-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 600px) {
+            #canvas {
+                width: 100%;
+            }
+
+            .btn {
+                display: block;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <canvas id="signatureCanvas" width="400" height="200"></canvas>
-  <button id="clearButton">Clear Signature</button>
-  <button id="saveButton">Save Signature</button>
-  <script src="script.js"></script>
+    <h1>Sign EZ</h1>
+    <div class="interactive-text">Sign Here:</div>
+    <canvas id="canvas" width="600" height="200"></canvas>
+    <br>
+    <div class="interactive-text">Pick Color</div>
+    <input type="color" id="colorPicker">
+    <br>
+    <div class="interactive-text">Resolution (width x height)  
+    Make sure if you have BIG NAME pick large width and less hieght (E.g 500 x 200)</div>
+    <input type="number" id="widthInput" placeholder="Width" step="1">
+    <input type="number" id="heightInput" placeholder="Height" step="1">
+    <br>
+    <br>
+    <button id="clearBtn" class="btn">Clear</button>
+    <button id="saveBtn" class="btn">Save</button>
+
+<script>
+    // Get canvas element and context
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    // Variables to track the position and color
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let signatureColor = '#000'; // Default color is black
+
+    // Color picker element
+    const colorPicker = document.getElementById('colorPicker');
+    colorPicker.addEventListener('input', updateSignatureColor);
+
+    // Event listeners
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', drawTouch);
+    canvas.addEventListener('touchend', stopDrawing);
+
+    document.getElementById('clearBtn').addEventListener('click', clearCanvas);
+    document.getElementById('saveBtn').addEventListener('click', saveSignature);
+
+    // Functions
+    function startDrawing(e) {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        context.beginPath();
+        context.moveTo(lastX, lastY);
+        context.lineTo(e.offsetX, e.offsetY);
+        context.strokeStyle = signatureColor;
+        context.lineWidth = 2;
+        context.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    function handleTouchStart(e) {
+        if (e.touches.length === 1) {
+            e.preventDefault();
+        }
+        const touch = e.touches[0];
+        isDrawing = true;
+        [lastX, lastY] = [touch.clientX, touch.clientY];
+    }
+
+    function drawTouch(e) {
+        if (!isDrawing) return;
+        const touch = e.touches[0];
+        context.beginPath();
+        context.moveTo(lastX, lastY);
+        context.lineTo(touch.clientX, touch.clientY);
+        context.strokeStyle = signatureColor;
+        context.lineWidth = 2;
+        context.stroke();
+        [lastX, lastY] = [touch.clientX, touch.clientY];
+    }
+
+    function clearCanvas() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveSignature() {
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const width = parseInt(widthInput.value) || canvas.width;
+        const height = parseInt(heightInput.value) || canvas.height;
+
+        // Create a new canvas with white background and desired resolution
+        const newCanvas = document.createElement('canvas');
+        newCanvas.width = width;
+        newCanvas.height = height;
+        const newContext = newCanvas.getContext('2d');
+        newContext.fillStyle = '#fff';
+        newContext.fillRect(0, 0, newCanvas.width, newCanvas.height);
+        newContext.drawImage(canvas, 0, 0, newCanvas.width, newCanvas.height);
+
+        // Convert the new canvas to an image with signature color and white background
+        const signatureImage = document.createElement('a');
+        signatureImage.href = newCanvas.toDataURL('image/jpeg', 1.0);
+        signatureImage.download = 'signature.jpg';
+        signatureImage.click();
+    }
+
+    function updateSignatureColor() {
+        signatureColor = colorPicker.value;
+    }
+</script>
 </body>
 </html>
