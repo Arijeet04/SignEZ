@@ -34,4 +34,4 @@ The web page is compatible with modern web browsers that support HTML5 and JavaS
 
 ## Vercel
 
-```https://viveklistenus.github.io/signature_capture.io/```
+```https://arijeet-sign-ez.vercel.app/```
