@@ -5,7 +5,6 @@ Welcome to SignEZ, your hassle-free solution for creating, capturing, and managi
 
 ![Logo](https://github.com/Arijeet04/SignEZ/blob/main/SignEZ.png)
 
-
 ## Usage
 
 
