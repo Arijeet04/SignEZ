@@ -12,6 +12,7 @@ let signatureColor = '#000'; // Default color is black
 const colorPicker = document.getElementById('colorPicker');
 colorPicker.addEventListener('input', updateSignatureColor);
 
+
 // Event listeners
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
